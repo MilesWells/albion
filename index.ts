@@ -1,16 +1,23 @@
-import Resource, { RawResources, RefinedResources } from "./Resource.ts";
+import Resource from "./Resource.ts";
 import ResourceTotals from "./ResourceTotals.ts";
 
 export type ResourceType = "ore" | "bar";
 
 export type Enchantment = "none" | "uncommon" | "rare" | "exceptional";
-export type Tier = 3 | 4 | 5;
+export type Tier = 2 | 3 | 4 | 5 | 6;
 
 const enchantmentMap: { [k: number]: Enchantment } = {
   0: "none",
   1: "uncommon",
   2: "rare",
   3: "exceptional",
+};
+
+const enchantmentToNumberMap: { [k: string]: number } = {
+  "none": 0,
+  "uncommon": 1,
+  "rare": 2,
+  "exceptional": 3,
 };
 
 const rawToRefinedMap: { [k: string]: ResourceType } = {
@@ -23,10 +30,12 @@ const refinedToRawMap: { [k: string]: ResourceType } = {
   "ore": "ore",
 };
 
-const tierRawMultiplier: { [k: number]: number } = {
+export const tierRawMultiplier: { [k: number]: number } = {
+  2: 2,
   3: 2,
   4: 2,
   5: 3,
+  6: 4,
 };
 
 const args = [...Deno.args];
@@ -93,8 +102,14 @@ function tierBelow(tier: Tier): Tier {
 
 const totals = new ResourceTotals();
 
+// add refined resources we already have
+resourceHaves.reduce(
+  (_, cur) => cur.isRefined ? totals.craft(cur) : totals,
+  totals,
+);
+
 function calculate(
-  { isRefined, enchantment, tier, type, have }: Resource,
+  { isRefined, enchantment, tier, type, quantity: have }: Resource,
 ): ResourceTotals {
   // if passed a refined resource, switch to calculating raw
   if (isRefined) {
@@ -108,33 +123,63 @@ function calculate(
     );
   }
 
-  // buying all tier 3 and below resources needed already refined so we can skip calculating tier 3
-  if (tier === 3) return totals;
-
   const make = Math.ceil(have / tierRawMultiplier[tier]);
-  const refinedAddition = new Resource(
-    enchantment,
-    tierBelow(tier),
-    rawToRefinedMap[type],
-    make,
+
+  totals.addNeed(
+    new Resource(enchantment, tierBelow(tier), rawToRefinedMap[type], make),
   );
-  
-  totals.add(refinedAddition);
 
-  if (have % tierRawMultiplier[tier] !== 0) totals.add(new Resource(
-    enchantment,
-    tier,
-    type,
-    tierRawMultiplier[tier] - (have % tierRawMultiplier[tier]),
-  ));
+  totals.craft(
+    new Resource(
+      enchantment,
+      tier,
+      rawToRefinedMap[type],
+      make,
+    ),
+  );
 
-  return calculate(refinedAddition);
+  if (have % tierRawMultiplier[tier] !== 0) {
+    totals.addNeed(
+      new Resource(
+        enchantment,
+        tier,
+        type,
+        tierRawMultiplier[tier] - (have % tierRawMultiplier[tier]),
+      ),
+    );
+  }
+
+  return totals;
 }
 
+// sort resources by tier -> refined/raw -> enchantment
+function sortResource(
+  { tier: tierA, isRefined: aRefined, enchantment: aEnchantment }: Resource,
+  { tier: tierB, isRefined: bRefined, enchantment: bEnchantment }: Resource,
+): number {
+  if (tierA > tierB) return 1;
+  else if (tierA === tierB) {
+    if (aRefined === bRefined) {
+      return enchantmentToNumberMap[aEnchantment] > enchantmentToNumberMap[bEnchantment] ? 1 : -1;
+    }
+    return aRefined ? 1 : -1;
+  }
+  return -1;
+}
+
+const sortedHaves = resourceHaves.sort(sortResource);
+
 console.log("You have:");
-console.log(resourceHaves.map((rh) => rh.print()).join("\n"));
+console.log(sortedHaves.map((r) => r.print()).join("\n"));
 
-const resourceNeeds = resourceHaves.reduce((_, cur) => calculate(cur), totals);
+const resourceNeeds = sortedHaves.reduce(
+  (_, cur) => cur.isRefined ? totals : calculate(cur),
+  totals,
+);
 
-console.log("\nTo use all your resources, you need to buy:");
-console.log(resourceNeeds.resources.map((rh) => rh.print()).join("\n"));
+console.log(
+  "\nTo use all your resources, you need to buy:",
+);
+console.log(
+  resourceNeeds.resources.sort(sortResource).map((rh) => rh.print()).join("\n"),
+);

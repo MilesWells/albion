@@ -1,13 +1,24 @@
-import { Enchantment, Tier, ResourceType } from "./index.ts";
+import { Enchantment, Tier, ResourceType, tierRawMultiplier } from "./index.ts";
 
-export const RefinedResources: Readonly<ResourceType[]> = ["bar"] as const;
-export const RawResources: Readonly<ResourceType[]> = ["ore"] as const;
+export const RefinedResources: ResourceType[] = ["bar"];
+export const RawResources: ResourceType[] = ["ore"];
+
+const enchantmentToNumberMap: { [k: string]: string } = {
+  "none": "",
+  "uncommon": ".1",
+  "rare": ".2",
+  "exceptional": ".3",
+};
 
 const nameMap: {
   [t in Tier]: {
     [rt in ResourceType]: string;
   };
 } = {
+  2: {
+    "bar": "copper bar",
+    "ore": "copper ore",
+  },
   3: {
     "bar": "bronze bar",
     "ore": "tin ore",
@@ -20,6 +31,10 @@ const nameMap: {
     "bar": "titanium steel bar",
     "ore": "titanium ore",
   },
+  6: {
+    "bar": "runite steel bar",
+    "ore": "runite ore",
+  },
 };
 
 interface Recipe {
@@ -29,7 +44,7 @@ interface Recipe {
 
 export default class Resource {
   enchantment: Enchantment;
-  have: number;
+  quantity: number;
   tier: Tier;
   type: ResourceType;
   recipe: Recipe;
@@ -38,17 +53,13 @@ export default class Resource {
     enchantment: Enchantment,
     tier: Tier,
     type: ResourceType,
-    have?: number,
+    quantity?: number,
   ) {
-    this.enchantment = tier === 3 ? "none" : enchantment;
+    this.enchantment = tier <= 3 ? "none" : enchantment;
     this.tier = tier;
     this.type = type;
-    this.have = have ?? 0;
-    if (this.tier >= 5) {
-      this.recipe = { raw: 3, refined: 1 };
-    } else {
-      this.recipe = { raw: 2, refined: 1 };
-    }
+    this.quantity = quantity ?? 0;
+    this.recipe = { raw: tierRawMultiplier[tier], refined: +(tier > 2) };
   }
   merge = (other: Resource) => {
     if (
@@ -57,18 +68,22 @@ export default class Resource {
     ) {
       throw `Cannot merge [${other.print()}] with [${this.print()}]`;
     }
-    this.have += other.have;
+    this.quantity += other.quantity;
   };
   print = () =>
-    `${this.have}${
+    `${this.quantity}${
       this.enchantment === "none" ? "" : " " + this.enchantment
-    } ${this.name}`;
+    } ${this.name} (T${this.tier}${
+      this.enchantment === "none"
+        ? ""
+        : enchantmentToNumberMap[this.enchantment]
+    })`;
 
   get name() {
     return nameMap[this.tier][this.type];
   }
 
   get isRefined() {
-    return this.type in RefinedResources;
+    return RefinedResources.includes(this.type);
   }
 }
