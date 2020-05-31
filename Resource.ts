@@ -18,22 +18,42 @@ const nameMap: {
   2: {
     "bar": "copper bar",
     "ore": "copper ore",
+    "wood": "birch log",
+    "plank": "birch plank",
+    "rock": "limestone",
+    "stone block": "limestone block",
   },
   3: {
     "bar": "bronze bar",
     "ore": "tin ore",
+    "wood": "chestnut log",
+    "plank": "chestnut plank",
+    "rock": "sandstone",
+    "stone block": "sandstone block",
   },
   4: {
     "bar": "steel bar",
     "ore": "iron ore",
+    "wood": "pine log",
+    "plank": "pine plank",
+    "rock": "travertine",
+    "stone block": "travertine block",
   },
   5: {
     "bar": "titanium steel bar",
     "ore": "titanium ore",
+    "wood": "cedar log",
+    "plank": "cedar plank",
+    "rock": "granite",
+    "stone block": "granite block",
   },
   6: {
     "bar": "runite steel bar",
     "ore": "runite ore",
+    "wood": "bloodoak log",
+    "plank": "bloodoak plank",
+    "rock": "slate",
+    "stone block": "slate block",
   },
 };
 

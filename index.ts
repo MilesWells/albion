@@ -1,7 +1,13 @@
 import Resource from "./Resource.ts";
 import ResourceTotals from "./ResourceTotals.ts";
 
-export type ResourceType = "ore" | "bar";
+export type ResourceType =
+  | "ore"
+  | "bar"
+  | "rock"
+  | "stone block"
+  | "wood"
+  | "plank";
 
 export type Enchantment = "none" | "uncommon" | "rare" | "exceptional";
 export type Tier = 2 | 3 | 4 | 5 | 6;
@@ -23,11 +29,19 @@ const enchantmentToNumberMap: { [k: string]: number } = {
 const rawToRefinedMap: { [k: string]: ResourceType } = {
   "ore": "bar",
   "bar": "bar",
+  "rock": "stone block",
+  "stone block": "stone block",
+  "wood": "plank",
+  "plank": "plank",
 };
 
 const refinedToRawMap: { [k: string]: ResourceType } = {
   "bar": "ore",
   "ore": "ore",
+  "stone block": "rock",
+  "rock": "rock",
+  "plank": "wood",
+  "wood": "wood",
 };
 
 export const tierRawMultiplier: { [k: number]: number } = {
@@ -152,17 +166,25 @@ function calculate(
   return totals;
 }
 
-// sort resources by tier -> refined/raw -> enchantment
+// sort resources by type -> tier -> refined/raw -> enchantment
 function sortResource(
-  { tier: tierA, isRefined: aRefined, enchantment: aEnchantment }: Resource,
-  { tier: tierB, isRefined: bRefined, enchantment: bEnchantment }: Resource,
+  { type: typeA, tier: tierA, isRefined: aRefined, enchantment: aEnchantment }:
+    Resource,
+  { type: typeB, tier: tierB, isRefined: bRefined, enchantment: bEnchantment }:
+    Resource,
 ): number {
-  if (tierA > tierB) return 1;
-  else if (tierA === tierB) {
-    if (aRefined === bRefined) {
-      return enchantmentToNumberMap[aEnchantment] > enchantmentToNumberMap[bEnchantment] ? 1 : -1;
+  if (typeA < typeB) return 1;
+  else if (typeA === typeB) {
+    if (tierA > tierB) return 1;
+    else if (tierA === tierB) {
+      if (aRefined === bRefined) {
+        return enchantmentToNumberMap[aEnchantment] >
+          enchantmentToNumberMap[bEnchantment]
+          ? 1
+          : -1;
+      }
+      return aRefined ? 1 : -1;
     }
-    return aRefined ? 1 : -1;
   }
   return -1;
 }
