@@ -1,13 +1,15 @@
-import Resource from "./Resource.ts";
+import { Resource } from './Resource.ts';
 
 const findResource = (resource: Resource, array: Resource[]) => {
-  return array.find((r) =>
-    r.type === resource.type && r.tier === resource.tier &&
-    r.enchantment === resource.enchantment
+  return array.find(
+    (r) =>
+      r.type === resource.type &&
+      r.tier === resource.tier &&
+      r.enchantment === resource.enchantment
   );
 };
 
-export default class ResourceTotals {
+export class ResourceTotals {
   #need: Resource[] = [];
   #crafted: Resource[] = [];
 
@@ -24,7 +26,7 @@ export default class ResourceTotals {
     const existingResource = findResource(resource, this.#crafted);
 
     if (!existingResource) {
-      throw new Error("Cannot remove resource that does not already exist");
+      throw new Error('Cannot remove resource that does not already exist');
     }
 
     // trying to remove more than we have
@@ -32,7 +34,7 @@ export default class ResourceTotals {
       const idx = this.#crafted.indexOf(existingResource);
       this.#crafted = [
         ...this.#crafted.slice(0, idx),
-        ...this.#crafted.slice(idx + 1),
+        ...this.#crafted.slice(idx + 1)
       ];
 
       // repurpose Resource already in scope (now removed from array)
