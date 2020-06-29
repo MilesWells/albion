@@ -1,1 +1,1 @@
-export type RawResource = 'ore' | 'rock' | 'wood';
+export type RawResource = 'ore' | 'rock' | 'wood' | 'hide' | 'fiber';

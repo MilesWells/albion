@@ -23,13 +23,17 @@ const enchantmentToNumberMap: { [k in Enchantment]: number } = {
 const rawToRefinedMap: { [k in RawResource]: RefinedResource } = {
   ore: 'bar',
   rock: 'stone block',
-  wood: 'plank'
+  wood: 'plank',
+  fiber: 'cloth',
+  hide: 'leather'
 };
 
 const refinedToRawMap: { [k in RefinedResource]: RawResource } = {
   bar: 'ore',
   'stone block': 'rock',
-  plank: 'wood'
+  plank: 'wood',
+  cloth: 'fiber',
+  leather: 'hide'
 };
 
 export const tierRawMultiplier: { [k: number]: number } = {
@@ -37,7 +41,9 @@ export const tierRawMultiplier: { [k: number]: number } = {
   3: 2,
   4: 2,
   5: 3,
-  6: 4
+  6: 4,
+  7: 5,
+  8: 1
 };
 
 const args = [...Deno.args];
@@ -120,7 +126,7 @@ function calculate({
       new Resource(
         enchantment,
         tier,
-        refinedToRawMap[type],
+        refinedToRawMap[<RefinedResource>type],
         have * tierRawMultiplier[tier]
       )
     );
@@ -129,10 +135,17 @@ function calculate({
   const make = Math.ceil(have / tierRawMultiplier[tier]);
 
   totals.addNeed(
-    new Resource(enchantment, tierBelow(tier), rawToRefinedMap[type], make)
+    new Resource(
+      enchantment,
+      tierBelow(tier),
+      rawToRefinedMap[<RawResource>type],
+      make
+    )
   );
 
-  totals.craft(new Resource(enchantment, tier, rawToRefinedMap[type], make));
+  totals.craft(
+    new Resource(enchantment, tier, rawToRefinedMap[<RawResource>type], make)
+  );
 
   if (have % tierRawMultiplier[tier] !== 0) {
     totals.addNeed(

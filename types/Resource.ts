@@ -24,7 +24,11 @@ const nameMap: {
     wood: 'birch log',
     plank: 'birch plank',
     rock: 'limestone',
-    'stone block': 'limestone block'
+    'stone block': 'limestone block',
+    cloth: 'simple cloth',
+    fiber: 'cotton',
+    hide: 'rugged hide',
+    leather: 'stiff leather'
   },
   3: {
     bar: 'bronze bar',
@@ -32,7 +36,11 @@ const nameMap: {
     wood: 'chestnut log',
     plank: 'chestnut plank',
     rock: 'sandstone',
-    'stone block': 'sandstone block'
+    'stone block': 'sandstone block',
+    cloth: 'neat cloth',
+    fiber: 'flax',
+    hide: 'thin hide',
+    leather: 'thick leather'
   },
   4: {
     bar: 'steel bar',
@@ -40,7 +48,11 @@ const nameMap: {
     wood: 'pine log',
     plank: 'pine plank',
     rock: 'travertine',
-    'stone block': 'travertine block'
+    'stone block': 'travertine block',
+    cloth: 'fine cloth',
+    fiber: 'hemp',
+    hide: 'medium hide',
+    leather: 'worked leather'
   },
   5: {
     bar: 'titanium steel bar',
@@ -48,7 +60,11 @@ const nameMap: {
     wood: 'cedar log',
     plank: 'cedar plank',
     rock: 'granite',
-    'stone block': 'granite block'
+    'stone block': 'granite block',
+    cloth: 'ornate cloth',
+    fiber: 'skyflower',
+    hide: 'heavy hide',
+    leather: 'cured leather'
   },
   6: {
     bar: 'runite steel bar',
@@ -56,7 +72,35 @@ const nameMap: {
     wood: 'bloodoak log',
     plank: 'bloodoak plank',
     rock: 'slate',
-    'stone block': 'slate block'
+    'stone block': 'slate block',
+    cloth: 'lavish cloth',
+    fiber: 'redleaf cotton',
+    hide: 'robust hide',
+    leather: 'hardened leather'
+  },
+  7: {
+    bar: 'meteorite steel bar',
+    ore: 'meteorite ore',
+    wood: 'ashenbark log',
+    plank: 'ashenbark plank',
+    rock: 'basalt',
+    'stone block': 'basalt block',
+    cloth: 'opulent cloth',
+    fiber: 'sunflax',
+    hide: 'thick hide',
+    leather: 'reinforced leather'
+  },
+  8: {
+    bar: 'adamantium steel bar',
+    ore: 'adamantium ore',
+    wood: 'whitewood log',
+    plank: 'whitewood plank',
+    rock: 'marble',
+    'stone block': 'marble block',
+    cloth: 'baroque cloth',
+    fiber: 'ghost hemp',
+    hide: 'resilient hide',
+    leather: 'fortified leather'
   }
 };
 
@@ -84,6 +128,7 @@ export class Resource {
     this.quantity = quantity ?? 0;
     this.recipe = { raw: tierRawMultiplier[tier], refined: +(tier > 2) };
   }
+
   merge = (other: Resource) => {
     if (
       other.enchantment !== this.enchantment ||
@@ -94,6 +139,7 @@ export class Resource {
     }
     this.quantity += other.quantity;
   };
+
   print = () =>
     `${this.quantity}${
       this.enchantment === 'none' ? '' : ' ' + this.enchantment
